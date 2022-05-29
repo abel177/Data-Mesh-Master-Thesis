@@ -1,0 +1,35 @@
+<policies>
+    <inbound>
+        <set-variable name="ContainerName" value="@(context.Request.Headers.GetValueOrDefault("Container"))" />
+        <set-variable name="BlobName" value="@(context.Request.Headers.GetValueOrDefault("Blob"))" />
+        <base />
+        <set-header name="Blob" exists-action="delete" />
+        <set-header name="Container" exists-action="delete" />
+        <set-header name="Ocp-Apim-Subscription-Key" exists-action="delete" />
+        <set-header name="Sec-Fetch-Site" exists-action="delete" />
+        <set-header name="Sec-Fetch-Mode" exists-action="delete" />
+        <set-header name="Sec-Fetch-Dest" exists-action="delete" />
+        <set-header name="Accept" exists-action="delete" />
+        <set-header name="Accept-Encoding" exists-action="delete" />
+        <set-header name="Referer" exists-action="delete" />
+        <set-header name="X-Forwarded-For" exists-action="delete" />
+        <set-header name="x-ms-version" exists-action="override">
+            <value>@{string version = "2017-11-09"; return version;}</value>
+        </set-header>
+        <set-backend-service base-url="@{
+string containerName = context.Variables.GetValueOrDefault<string>("ContainerName");
+string blobName = context.Variables.GetValueOrDefault<string>("BlobName");
+return String.Format("https://BLURRED.blob.core.windows.net/{0}/{1}", containerName, blobName);
+}" />
+        <authentication-managed-identity resource="https://storage.azure.com/" />
+    </inbound>
+    <backend>
+        <base />
+    </backend>
+    <outbound>
+        <base />
+    </outbound>
+    <on-error>
+        <base />
+    </on-error>
+</policies>
